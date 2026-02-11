@@ -5,16 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Carian Penjaga - SMK St Mark</title>
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0; 
-      padding: 0; 
-      background-color: #f5f5f5;
-      background-image: url('LOGO.png'); /* letak link logo sekolah di sini */
-      background-size: 200px auto; /* adjust saiz logo */
-      background-repeat: no-repeat;
-      background-position: center bottom;
-      opacity: 0.05; /* logo sangat halus */
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  position: relative;
+}
+/* Watermark logo */
+body::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-image: url('LOGO_SEKOLAH.png');
+  background-size: 400px;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.08;   /* hanya logo jadi halus */
+  width: 100%;
+  height: 100%;
+  z-index: -1;     /* letak di belakang */
     }
     h2, h4 { text-align: center; }
     input { 
@@ -128,6 +140,7 @@ function liveSearch() {
 
 </body>
 </html>
+
 
 
 
