@@ -1,100 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Carian Penjaga - SMK St Mark</title>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 20px; 
-      padding: 0; 
-      background-color: #f5f5f5;
-    }
-    h2, h4 { text-align: center; }
-    input { 
-      padding: 15px; 
-      width: 100%; 
-      max-width: 500px; 
-      font-size: 18px; 
-      margin: 0 auto; 
-      display: block;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    #result { 
-      margin-top: 20px; 
-      font-size: 18px; 
-      max-width: 600px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-left: auto;
-      margin-right: auto;
-    }
-    b { font-size: 18px; }
-    .phone { 
-      font-weight: bold; 
-      font-size: 22px; 
-      color: #000; 
-    }
-    @media (max-width: 600px) {
-      input, #result { font-size: 16px; }
-      .phone { font-size: 20px; }
-    }
-  </style>
+  <base target="_top">
+  <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
+  <h2>Dashboard Carian Telefon Ibu Bapa</h2>
 
-<h2>Dashboard Carian Penjaga</h2>
-<h4>SMK St Mark Butterworth</h4>
+  <input type="text" id="searchInput" placeholder="Taip Nama Murid">
+  <button onclick="searchData()">Cari</button>
 
-<input type="text" id="searchInput" placeholder="Taip Nama Murid" onkeyup="liveSearch()">
-<div id="result"></div>
+  <div id="reader" style="width:300px;"></div>
+
+  <h3 id="result"></h3>
 
 <script>
-let data = [];
+let allData = [];
 
-// Load CSV dari Sheet cikgu
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1Uxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
-  .then(response => response.text())
-  .then(csvText => {
-    const rows = csvText.split("\n");
-    data = rows.slice(1).map(r => r.split(","));
-  });
+google.script.run.withSuccessHandler(function(data){
+  allData = data;
+}).getData();
 
-function liveSearch() {
-  const input = document.getElementById("searchInput").value.trim().toLowerCase();
-  const resultDiv = document.getElementById("result");
+function searchData(){
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  let result = allData.find(row => row[0].toLowerCase().includes(input));
 
-  if (input.length < 1) { resultDiv.innerHTML = ""; return; }
-
-  const match = data.find(r => r[0] && r[0].toLowerCase().includes(input));
-
-  if (match) {
-    // Gunakan fallback "-" jika kosong atau undefined
-    const namaMurid = match[0] || "-";
-    const kelas = match[1] || "-";
-    const penjaga1 = match[2] || "-";
-    const no1 = match[3] || "-";
-    const penjaga2 = match[4] || "-";
-    const no2 = match[5] || "-";
-
-    resultDiv.innerHTML =
-      "<b>Nama Murid:</b> " + namaMurid + "<br>" +
-      "<b>Kelas:</b> " + kelas + "<br><br>" +
-
-      "<b>Penjaga 1:</b> " + penjaga1 + "<br>" +
-      "<b>No Telefon Penjaga 1:</b> <span class='phone'>" + no1 + "</span><br><br>" +
-
-      "<b>Penjaga 2:</b> " + penjaga2 + "<br>" +
-      "<b>No Telefon Penjaga 2:</b> <span class='phone'>" + no2 + "</span>";
+  if(result){
+    document.getElementById("result").innerHTML =
+      "Nama: " + result[0] + "<br>" +
+      "Kelas: " + result[1] + "<br>" +
+      "No Ibu: " + result[2] + "<br>" +
+      "No Bapa: " + result[3] + "<br>" +
+      "No Penjaga: " + result[4];
   } else {
-    resultDiv.innerHTML = "<span style='color:red'>Tiada Rekod Dijumpai</span>";
+    document.getElementById("result").innerHTML = "Tiada Rekod Dijumpai";
   }
 }
-</script>
 
+function onScanSuccess(decodedText) {
+  document.getElementById("searchInput").value = decodedText;
+  searchData();
+}
+
+new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 })
+.render(onScanSuccess);
+</script>
 </body>
 </html>
