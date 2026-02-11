@@ -7,17 +7,22 @@
   <style>
     body { 
       font-family: Arial, sans-serif; 
-      margin: 20px; 
+      margin: 0; 
       padding: 0; 
       background-color: #f5f5f5;
+      background-image: url('LOGO_SEKOLAH.png'); /* letak link logo sekolah di sini */
+      background-size: 200px auto; /* adjust saiz logo */
+      background-repeat: no-repeat;
+      background-position: center top;
+      opacity: 0.05; /* logo sangat halus */
     }
     h2, h4 { text-align: center; }
     input { 
       padding: 15px; 
-      width: 100%; 
+      width: 90%; 
       max-width: 500px; 
       font-size: 18px; 
-      margin: 0 auto; 
+      margin: 20px auto;
       display: block;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -26,22 +31,23 @@
       margin-top: 20px; 
       font-size: 18px; 
       max-width: 600px;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      background-color: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       margin-left: auto;
       margin-right: auto;
     }
     b { font-size: 18px; }
     .phone { 
       font-weight: bold; 
-      font-size: 22px; 
-      color: #000; 
+      font-size: 26px; 
+      color: #d32f2f; /* merah menyerlah */
+      text-shadow: 1px 1px 2px #aaa;
     }
     @media (max-width: 600px) {
       input, #result { font-size: 16px; }
-      .phone { font-size: 20px; }
+      .phone { font-size: 22px; }
     }
   </style>
 </head>
@@ -60,8 +66,8 @@ let data = [];
 fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1Uxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
   .then(response => response.text())
   .then(csvText => {
-    const rows = csvText.trim().split("\n"); // buang whitespace di awal/akhir
-    data = rows.slice(1).map(r => r.split(",").map(c => c.trim())); // buang whitespace tiap kolum
+    const rows = csvText.trim().split("\n"); 
+    data = rows.slice(1).map(r => r.split(",").map(c => c.trim()));
   });
 
 function liveSearch() {
@@ -70,7 +76,6 @@ function liveSearch() {
 
   if (input.length < 1) { resultDiv.innerHTML = ""; return; }
 
-  // search robust: ignore case & multiple whitespace
   const match = data.find(r => r[0] && r[0].toLowerCase().replace(/\s+/g,' ').includes(input.replace(/\s+/g,' ')));
 
   if (match) {
