@@ -61,24 +61,46 @@
 
 <script>
 let data = [];
+let loaded = false;
 
-// Load CSV dari Google Sheet cikgu
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1Uxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1UqYxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
   .then(response => response.text())
   .then(csvText => {
-    const rows = csvText.trim().split("\n"); 
-    data = rows.slice(1).map(r => r.split(",").map(c => c.trim()));
+    const rows = csvText.trim().split("\n");
+    data = rows.slice(1).map(row => 
+      row.replace(/\r/g,'').split(",").map(cell => cell.trim())
+    );
+    loaded = true;
+  })
+  .catch(error => {
+    document.getElementById("result").innerHTML =
+      "<span style='color:red'>Data gagal dimuatkan</span>";
   });
 
 function liveSearch() {
-  const input = document.getElementById("searchInput").value.trim().toLowerCase();
+
   const resultDiv = document.getElementById("result");
 
-  if (input.length < 1) { resultDiv.innerHTML = ""; return; }
+  if (!loaded) {
+    resultDiv.innerHTML = "Memuatkan data...";
+    return;
+  }
 
-  const match = data.find(r => r[0] && r[0].toLowerCase().replace(/\s+/g,' ').includes(input.replace(/\s+/g,' ')));
+  const input = document.getElementById("searchInput")
+    .value.trim().toLowerCase();
+
+  if (input.length < 1) {
+    resultDiv.innerHTML = "";
+    return;
+  }
+
+  const match = data.find(row =>
+    row[0] &&
+    row[0].toLowerCase().includes(input)
+  );
 
   if (match) {
+
     const namaMurid = match[0] || "-";
     const kelas = match[1] || "-";
     const penjaga1 = match[2] || "-";
@@ -95,13 +117,17 @@ function liveSearch() {
 
       "<b>Penjaga 2:</b> " + penjaga2 + "<br>" +
       "<b>No Telefon Penjaga 2:</b> <span class='phone'>" + no2 + "</span>";
+
   } else {
-    resultDiv.innerHTML = "<span style='color:red'>Tiada Rekod Dijumpai</span>";
+    resultDiv.innerHTML =
+      "<span style='color:red'>Tiada Rekod Dijumpai</span>";
   }
 }
 </script>
 
+
 </body>
 </html>
+
 
 
