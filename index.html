@@ -2,11 +2,47 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Carian Penjaga - SMK St Mark</title>
   <style>
-    body { font-family: Arial; margin: 20px; }
-    input { padding: 10px; width: 80%; font-size: 16px; }
-    #result { margin-top: 20px; font-size: 16px; }
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      padding: 0; 
+      background-color: #f5f5f5;
+    }
+    h2, h4 { text-align: center; }
+    input { 
+      padding: 15px; 
+      width: 100%; 
+      max-width: 500px; 
+      font-size: 18px; 
+      margin: 0 auto; 
+      display: block;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    #result { 
+      margin-top: 20px; 
+      font-size: 18px; 
+      max-width: 600px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    b { font-size: 18px; }
+    .phone { 
+      font-weight: bold; 
+      font-size: 22px; 
+      color: #000; 
+    }
+    @media (max-width: 600px) {
+      input, #result { font-size: 16px; }
+      .phone { font-size: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -20,12 +56,12 @@
 <script>
 let data = [];
 
-// Load CSV dari Sheet
-fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1UqYxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
+// Load CSV dari Google Sheet cikgu
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1Uxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
   .then(response => response.text())
   .then(csvText => {
-    const rows = csvText.split("\n");
-    data = rows.slice(1).map(r => r.split(","));
+    const rows = csvText.trim().split("\n"); // buang whitespace di awal/akhir
+    data = rows.slice(1).map(r => r.split(",").map(c => c.trim())); // buang whitespace tiap kolum
   });
 
 function liveSearch() {
@@ -34,18 +70,26 @@ function liveSearch() {
 
   if (input.length < 1) { resultDiv.innerHTML = ""; return; }
 
-  const match = data.find(r => r[0].toLowerCase().includes(input));
+  // search robust: ignore case & multiple whitespace
+  const match = data.find(r => r[0] && r[0].toLowerCase().replace(/\s+/g,' ').includes(input.replace(/\s+/g,' ')));
 
   if (match) {
+    const namaMurid = match[0] || "-";
+    const kelas = match[1] || "-";
+    const penjaga1 = match[2] || "-";
+    const no1 = match[3] || "-";
+    const penjaga2 = match[4] || "-";
+    const no2 = match[5] || "-";
+
     resultDiv.innerHTML =
-      "<b>Nama Murid:</b> " + match[0] + "<br>" +
-      "<b>Kelas:</b> " + match[1] + "<br><br>" +
+      "<b>Nama Murid:</b> " + namaMurid + "<br>" +
+      "<b>Kelas:</b> " + kelas + "<br><br>" +
 
-      "<b>Penjaga 1:</b> " + (match[2] || "-") + "<br>" +
-      "<b>No Telefon Penjaga 1:</b> " + (match[3] || "-") + "<br><br>" +
+      "<b>Penjaga 1:</b> " + penjaga1 + "<br>" +
+      "<b>No Telefon Penjaga 1:</b> <span class='phone'>" + no1 + "</span><br><br>" +
 
-      "<b>Penjaga 2:</b> " + (match[4] || "-") + "<br>" +
-      "<b>No Telefon Penjaga 2:</b> " + (match[5] || "-");
+      "<b>Penjaga 2:</b> " + penjaga2 + "<br>" +
+      "<b>No Telefon Penjaga 2:</b> <span class='phone'>" + no2 + "</span>";
   } else {
     resultDiv.innerHTML = "<span style='color:red'>Tiada Rekod Dijumpai</span>";
   }
