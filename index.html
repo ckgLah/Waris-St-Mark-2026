@@ -1,49 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <meta charset="UTF-8">
+  <title>Dashboard Carian Penjaga - SMK St Mark</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input { padding: 10px; width: 80%; font-size: 16px; }
+    #result { margin-top: 20px; font-size: 16px; }
+  </style>
 </head>
 <body>
-  <h2>Dashboard Carian Telefon Ibu Bapa</h2>
 
-  <input type="text" id="searchInput" placeholder="Taip Nama Murid">
-  <button onclick="searchData()">Cari</button>
+<h2>Dashboard Carian Penjaga</h2>
+<h4>SMK St Mark Butterworth</h4>
 
-  <div id="reader" style="width:300px;"></div>
-
-  <h3 id="result"></h3>
+<input type="text" id="searchInput" placeholder="Taip Nama Murid" onkeyup="liveSearch()">
+<div id="result"></div>
 
 <script>
-let allData = [];
+let data = [];
 
-google.script.run.withSuccessHandler(function(data){
-  allData = data;
-}).getData();
+// Load CSV dari Sheet
+fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vRIHa_foG0zcZ1UqYxp-Ls_H8GHmeKHDTmrcpwU4u_eg_e8gY0PvHP4Cq7nmecRrCNf6GDP5IkgdYwI/pub?gid=0&single=true&output=csv")
+  .then(response => response.text())
+  .then(csvText => {
+    const rows = csvText.split("\n");
+    data = rows.slice(1).map(r => r.split(","));
+  });
 
-function searchData(){
-  let input = document.getElementById("searchInput").value.toLowerCase();
-  let result = allData.find(row => row[0].toLowerCase().includes(input));
+function liveSearch() {
+  const input = document.getElementById("searchInput").value.trim().toLowerCase();
+  const resultDiv = document.getElementById("result");
 
-  if(result){
-    document.getElementById("result").innerHTML =
-      "Nama: " + result[0] + "<br>" +
-      "Kelas: " + result[1] + "<br>" +
-      "No Ibu: " + result[2] + "<br>" +
-      "No Bapa: " + result[3] + "<br>" +
-      "No Penjaga: " + result[4];
+  if (input.length < 1) { resultDiv.innerHTML = ""; return; }
+
+  const match = data.find(r => r[0].toLowerCase().includes(input));
+
+  if (match) {
+    resultDiv.innerHTML =
+      "<b>Nama Murid:</b> " + match[0] + "<br>" +
+      "<b>Kelas:</b> " + match[1] + "<br><br>" +
+
+      "<b>Penjaga 1:</b> " + (match[2] || "-") + "<br>" +
+      "<b>No Telefon Penjaga 1:</b> " + (match[3] || "-") + "<br><br>" +
+
+      "<b>Penjaga 2:</b> " + (match[4] || "-") + "<br>" +
+      "<b>No Telefon Penjaga 2:</b> " + (match[5] || "-");
   } else {
-    document.getElementById("result").innerHTML = "Tiada Rekod Dijumpai";
+    resultDiv.innerHTML = "<span style='color:red'>Tiada Rekod Dijumpai</span>";
   }
 }
-
-function onScanSuccess(decodedText) {
-  document.getElementById("searchInput").value = decodedText;
-  searchData();
-}
-
-new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 })
-.render(onScanSuccess);
 </script>
+
 </body>
 </html>
